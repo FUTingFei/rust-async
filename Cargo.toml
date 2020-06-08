@@ -11,3 +11,5 @@ hyper = "0.13.0"
 tokio = { version = "0.2", features = ["full"] }
 failure = "0.1.6"
 reqwest = "0.9.24"
+cita-tool = { git = "https://github.com/citahub/cita-cli" }
+cita-types = { git = "https://github.com/flyq/cita-common", branch = "develop" }
