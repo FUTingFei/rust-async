@@ -10,7 +10,7 @@ use cita_tool::{
 use cita_types::U256;
 
 
-pub const RPC_URL: &str = "http://101.132.38.100:1337";
+pub const RPC_URL: &str = "http://xxx:1337";
 
 
 async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
@@ -19,7 +19,7 @@ async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> 
         .unwrap()
         .into();
     let tx_options = TransactionOptions::new()
-        .set_code("0xfe")
+        .set_code("")
         .set_address("0xf26e01badf4c282edd8c8c14df84dae4a5855632")
         .set_value(Some(U256::from_dec_str("1000000000000000000000").unwrap()));
     let client = CitaClient::new();
