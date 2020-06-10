@@ -6,9 +6,11 @@ use cita_tool::{
     client::basic::{Client, ClientExt},
     crypto::Encryption,
     PrivateKey, TransactionOptions,
-    JsonRpcParams,
+    JsonRpcParams, ParamsValue,
 };
 use cita_types::U256;
+use cita_cli::printer::Printer;
+
 
 
 pub const RPC_URL: &str = "http://xxx:1337";
