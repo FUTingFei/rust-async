@@ -1,7 +1,6 @@
 use std::net::SocketAddr;
 use std::convert::From;
-use futures::executor::block_on;
-use std::time::Instant;
+use std::time::{Instant};
 
 
 use hyper::{Body, Request, Response, Server, service::{make_service_fn, service_fn}};
@@ -20,7 +19,7 @@ pub const RPC_URL: &str = "http://101.132.38.100:1337";
 
 
 async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
-    let start = Instant::now();
+    let start = Instant::now();    
     let encryption = Encryption::Secp256k1;
     let priv_key: PrivateKey = PrivateKey::from_str("b235fb8b5d4765c7bfa18d4844cc3eb39412f100e84073bf7cc2c97ecf2d446b", encryption)
         .unwrap()
@@ -36,11 +35,23 @@ async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> 
 
     let number_total = 10;
     let mut txs = Vec::with_capacity(number_total as usize);
-
+    
     println!("{:?}","before loop");
 
-    block_on(finish(&mut txs, number_total, client.clone(), tx_options));
-
+    for _ in 0..number_total {
+        let tx = client.generate_transaction(tx_options).unwrap();
+        let byte_code = client.generate_sign_transaction(&tx).unwrap();
+        let params = JsonRpcParams::new()
+            .insert(
+                "method",
+                ParamsValue::String(String::from("sendRawTransaction")),
+            )
+            .insert(
+                "params",
+                ParamsValue::List(vec![ParamsValue::String(byte_code)]),
+            );
+        txs.push(params);
+    }
 
     println!("{:?}","after loop");
     let _result = client.send_request(txs.into_iter());
@@ -51,32 +62,9 @@ async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> 
     let _rpc_response = client.send_raw_transaction(tx_options).unwrap();
 
     let duration2 = start.elapsed();
-
     println!("Time elapsed in expensive_function() is: {:?}, {:?}", duration1, duration2);
 
     Ok(Response::new(Body::from("hello, world!")))
-}
-
-async fn finish(txs: &mut Vec<JsonRpcParams>, number_total: i32, client: CitaClient, tx_options: TransactionOptions<'_>) {
-    for _ in 0..number_total {
-        let f = gentx(client.clone(), tx_options);
-        txs.push(f.await)
-    }
-}
-
-async fn gentx(mut client: CitaClient, tx_options: TransactionOptions<'_>) -> JsonRpcParams {
-    let tx = client.generate_transaction(tx_options).unwrap();
-    let byte_code = client.generate_sign_transaction(&tx).unwrap();
-    let params = JsonRpcParams::new()
-        .insert(
-            "method",
-            ParamsValue::String(String::from("sendRawTransaction")),
-        )
-        .insert(
-            "params",
-            ParamsValue::List(vec![ParamsValue::String(byte_code)]),
-        );
-    params
 }
 
 async fn run_server(addr: SocketAddr) {
@@ -97,7 +85,7 @@ async fn run_server(addr: SocketAddr) {
 }
 #[tokio::main]
 async fn main() {
-    let addr = SocketAddr::from(([127, 0, 0, 1], 4000));
+    let addr = SocketAddr::from(([127, 0, 0, 1], 5000));
 
     run_server(addr).await;
 }
