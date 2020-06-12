@@ -16,25 +16,32 @@ use cita_types::U256;
 
 
 pub const RPC_URL: &str = "http://101.132.38.100:1337";
-
+pub const BLOCK_NUMBER: &str = "blockNumber";
 
 async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
-    let start = Instant::now();    
+    let start = Instant::now();
     let encryption = Encryption::Secp256k1;
     let priv_key: PrivateKey = PrivateKey::from_str("b235fb8b5d4765c7bfa18d4844cc3eb39412f100e84073bf7cc2c97ecf2d446b", encryption)
-        .unwrap()
-        .into();
-    let tx_options = TransactionOptions::new()
-        .set_address("0xf26e01badf4c282edd8c8c14df84dae4a5855632")
-        .set_value(Some(U256::from_dec_str("1000000000000000000000").unwrap()));
+        .unwrap().into();
+    let chain_id = U256::from_dec_str("1").unwrap();
+
 
     let client = CitaClient::new();
     let mut client = client.set_uri(RPC_URL);
     let client = client.set_private_key(&priv_key);
+    let client = client.set_chain_id(chain_id);
 
-    let number_total = 10;
+    let current_block_number = client.get_current_height().unwrap();
+
+    let tx_options = TransactionOptions::new()
+        .set_address("0xf26e01badf4c282edd8c8c14df84dae4a5855632")
+        .set_value(Some(U256::from_dec_str("1000000000000000000000").unwrap()))
+        .set_current_height(Some(current_block_number))
+        .set_version(Some(2u32));
+
+    let number_total = 10000;
     let mut txs = Vec::with_capacity(number_total as usize);
-    
+
     println!("{:?}","before loop");
 
     for _ in 0..number_total {
